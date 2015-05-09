@@ -1,0 +1,119 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\TypeScript\Microsoft.TypeScript.Default.props" Condition="Exists('$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\TypeScript\Microsoft.TypeScript.Default.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <ProjectGuid>{48BF6F0A-602D-4187-84C9-6515B5C7439E}</ProjectGuid>
+    <ProjectTypeGuids>{349c5851-65df-11da-9384-00065b846f21};{fae04ec0-301f-11d3-bf4b-00c04f79efbc}</ProjectTypeGuids>
+    <OutputType>Library</OutputType>
+    <OutputPath>bin</OutputPath>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <DebugType>full</DebugType>
+    <DebugSymbols>true</DebugSymbols>
+    <TypeScriptToolsVersion>1.5</TypeScriptToolsVersion>
+    <UseIISExpress>true</UseIISExpress>
+    <IISExpressSSLPort />
+    <IISExpressAnonymousAuthentication />
+    <IISExpressWindowsAuthentication />
+    <IISExpressUseClassicPipelineMode />
+  </PropertyGroup>
+  <ItemGroup>
+    <Content Include="app.css" />
+    <Content Include="app.js" />
+    <Content Include="Graphics\assets\powerbar.png" />
+    <Content Include="Graphics\ninja\ninja.png" />
+    <Content Include="Graphics\scene\BG\background.png" />
+    <Content Include="Graphics\scene\Object\Bush %281%29.png" />
+    <Content Include="Graphics\scene\Object\Bush %282%29.png" />
+    <Content Include="Graphics\scene\Object\Bush %283%29.png" />
+    <Content Include="Graphics\scene\Object\Bush %284%29.png" />
+    <Content Include="Graphics\scene\Object\Crate.png" />
+    <Content Include="Graphics\scene\Object\Mushroom_1.png" />
+    <Content Include="Graphics\scene\Object\Mushroom_2.png" />
+    <Content Include="Graphics\scene\Object\Sign_1.png" />
+    <Content Include="Graphics\scene\Object\Sign_2.png" />
+    <Content Include="Graphics\scene\Object\Stone.png" />
+    <Content Include="Graphics\scene\Object\Tree_1.png" />
+    <Content Include="Graphics\scene\Object\Tree_2.png" />
+    <Content Include="Graphics\scene\Object\Tree_3.png" />
+    <Content Include="Graphics\scene\Tiles\1.png" />
+    <Content Include="Graphics\scene\Tiles\10.png" />
+    <Content Include="Graphics\scene\Tiles\11.png" />
+    <Content Include="Graphics\scene\Tiles\12.png" />
+    <Content Include="Graphics\scene\Tiles\13.png" />
+    <Content Include="Graphics\scene\Tiles\14.png" />
+    <Content Include="Graphics\scene\Tiles\15.png" />
+    <Content Include="Graphics\scene\Tiles\16.png" />
+    <Content Include="Graphics\scene\Tiles\17.png" />
+    <Content Include="Graphics\scene\Tiles\18.png" />
+    <Content Include="Graphics\scene\Tiles\2.png" />
+    <Content Include="Graphics\scene\Tiles\3.png" />
+    <Content Include="Graphics\scene\Tiles\4.png" />
+    <Content Include="Graphics\scene\Tiles\5.png" />
+    <Content Include="Graphics\scene\Tiles\6.png" />
+    <Content Include="Graphics\scene\Tiles\7.png" />
+    <Content Include="Graphics\scene\Tiles\8.png" />
+    <Content Include="Graphics\scene\Tiles\9.png" />
+    <Content Include="Graphics\scene\Tiles\tile_Square.png" />
+    <Content Include="index.html" />
+    <Content Include="NinJump.js" />
+    <Content Include="phaser.js" />
+    <Content Include="phaser.min.js" />
+    <Content Include="phaser2.png" />
+    <Content Include="web.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <TypeScriptCompile Include="app.ts" />
+    <TypeScriptCompile Include="NinJump.ts" />
+    <TypeScriptCompile Include="p2.d.ts" />
+    <TypeScriptCompile Include="phaser.comments.d.ts" />
+    <TypeScriptCompile Include="pixi.comments.d.ts" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Graphics\scene\BG\Thumbs.db" />
+    <Content Include="Graphics\scene\Object\Thumbs.db" />
+    <Content Include="Graphics\scene\Tiles\Thumbs.db" />
+    <Content Include="Graphics\ninja\ninja2.json" />
+    <None Include="web.Debug.config">
+      <DependentUpon>web.config</DependentUpon>
+    </None>
+    <None Include="web.Release.config">
+      <DependentUpon>web.config</DependentUpon>
+    </None>
+  </ItemGroup>
+  <PropertyGroup>
+    <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">12.0</VisualStudioVersion>
+  </PropertyGroup>
+  <PropertyGroup>
+    <RootNamespace>HelloPhaser</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\WebApplications\Microsoft.WebApplication.targets" Condition="Exists('$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\WebApplications\Microsoft.WebApplication.targets')" />
+  <ProjectExtensions>
+    <VisualStudio>
+      <FlavorProperties GUID="{349c5851-65df-11da-9384-00065b846f21}">
+        <WebProjectProperties>
+          <UseIIS>True</UseIIS>
+          <AutoAssignPort>True</AutoAssignPort>
+          <DevelopmentServerPort>9864</DevelopmentServerPort>
+          <DevelopmentServerVPath>/</DevelopmentServerVPath>
+          <IISUrl>http://localhost:9864/</IISUrl>
+          <NTLMAuthentication>False</NTLMAuthentication>
+          <UseCustomServer>False</UseCustomServer>
+          <CustomServerUrl>
+          </CustomServerUrl>
+          <SaveServerSettingsInUserFile>False</SaveServerSettingsInUserFile>
+        </WebProjectProperties>
+      </FlavorProperties>
+    </VisualStudio>
+  </ProjectExtensions>
+  <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
+    <TypeScriptRemoveComments>false</TypeScriptRemoveComments>
+    <TypeScriptSourceMap>true</TypeScriptSourceMap>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+    <TypeScriptRemoveComments>true</TypeScriptRemoveComments>
+    <TypeScriptSourceMap>false</TypeScriptSourceMap>
+  </PropertyGroup>
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\TypeScript\Microsoft.TypeScript.targets" Condition="Exists('$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\TypeScript\Microsoft.TypeScript.targets')" />
+</Project>

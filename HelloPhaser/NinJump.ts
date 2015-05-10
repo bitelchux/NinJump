@@ -6,18 +6,14 @@ module NinJump {
         scaleWidth: number;
         scaleHeight: number;
         keepWidth: boolean;
-        constructor(width: number, height: number) {
-            this.scaleHeight = height * 1.0 / 1080;
-            this.scaleWidth = width * 1.0 / 1920;
-            if (this.scaleWidth > this.scaleHeight) {
-                this.height = height;
-                this.width = height * 1.0 * 1920 / 1080;
-                this.keepWidth = false;
-            } else {
-                this.width = width;
-                this.height = width * 1.0 * 1080 / 1920;
-                this.keepWidth = true;
-            }
+        scale: number;
+        constructor(_width: number, _height: number) {
+            this.scaleHeight = _height * 1.0 / 1080;
+            this.scaleWidth = _width * 1.0 / 1920;
+            this.height = _height;
+            this.width = _width;
+            this.keepWidth = this.scaleWidth > this.scaleHeight;
+            this.scale = this.keepWidth ? this.scaleWidth : this.scaleHeight;
         }
     }
 
@@ -37,25 +33,17 @@ module NinJump {
         constructor(game: Phaser.Game, x: number, y: number) {
             super(game, x, y, 'ninja');
             game.physics.enable(this, Phaser.Physics.ARCADE);
-            this.gravity = 800;
+            this.gravity = 1000* screenSetting.scale;
             this.animations.add('idle', [0, 3, 6, 9]);
             this.animations.add('jumpUp', [10, 12, 13, 14]);
             this.animations.add('jumpDown', [15, 17, 18, 19]);
-            this.state = 'idle';
+            this.state = 'jumping';
             this.jumpPower = 0;
             this.anchor.set(0.5);
-            this.lastPole = 1;
-            this.scale.setTo(screenSetting.keepWidth ? screenSetting.scaleWidth : screenSetting.scaleHeight);
+            this.lastPole = 0;
+            this.scale.setTo(screenSetting.scale);
         }
 
-        //update() {
-        //    //landing
-        //    if (this.state == 'jumping' && this.body['velocity']['y'] == 0) {
-        //        var timeJumpDown = 3/(this.jumpPower * (-0.9) / this.gravity); 
-        //        this.animations.stop();
-        //        this.animations.play('jumpDown', Math.round(timeJumpDown),false);
-        //    }
-        //}
     }
 
     class Pole extends Phaser.Sprite {
@@ -67,7 +55,7 @@ module NinJump {
             game.physics.enable(this, Phaser.Physics.ARCADE);
             this._game = play;
             this.body['immovable'] = true;
-            this.scale.setTo(screenSetting.keepWidth ? screenSetting.scaleWidth : screenSetting.scaleHeight);
+            this.scale.setTo(screenSetting.scale);
             this.anchor.setTo(0.5, 0);
         }
 
@@ -92,7 +80,7 @@ module NinJump {
         constructor(play:Play,x:number) {
             super(play.game, x, 0, 'backgroundScene');
             this._play = play;
-            this.scale.setTo(screenSetting.keepWidth ? screenSetting.scaleWidth : screenSetting.scaleHeight);
+            this.scale.setTo(screenSetting.scale);
             this.anchor.setTo(0, 0);
             play.game.physics.enable(this);
         }
@@ -126,22 +114,27 @@ module NinJump {
         ninja: Ninja;
         powerBar: Phaser.Sprite;
         powerTween: Phaser.Tween;
-        minPoleGap: number = 250 * (screenSetting.keepWidth ? screenSetting.scaleWidth : screenSetting.scaleHeight);
-        maxPoleGap: number = 400 * (screenSetting.keepWidth ? screenSetting.scaleWidth : screenSetting.scaleHeight);
-        minPoleHeight: number = 600 * (screenSetting.keepWidth ? screenSetting.scaleWidth : screenSetting.scaleHeight);
-        maxPoleHeight: number = 800 * (screenSetting.keepWidth ? screenSetting.scaleWidth : screenSetting.scaleHeight);
-        startPosition: number = 400 * (screenSetting.keepWidth ? screenSetting.scaleWidth : screenSetting.scaleHeight);
-        powerBarPosition: number = 20 * (screenSetting.keepWidth ? screenSetting.scaleWidth : screenSetting.scaleHeight);
+        minPoleGap: number = 250 * screenSetting.scale;
+        maxPoleGap: number = 500 * screenSetting.scale;
+        minPoleHeight: number = 500 * screenSetting.scale;
+        maxPoleHeight: number = 800 * screenSetting.scale;
+        startPosition: number = 400 * screenSetting.scale;
+        powerBarPosition: number = 20 * screenSetting.scale;
+        score: number;
+        scoreText: Phaser.Text;
+        scoreBoard: Phaser.BitmapData;
         preload() {
             this.load.atlasJSONArray('ninja', 'Graphics/ninja/ninja.png', 'Graphics/ninja/ninja2.json');
             this.load.image('pole', 'Graphics/scene/Tiles/tile_Square.png');
-            this.load.image('powerbar', 'Graphics/assets/powerbar.png');
+            this.load.image('powerbar', 'Graphics/assets/powerbar2.png');
             this.load.image('backgroundScene', 'Graphics/scene/BG/background.png');
+            this.load.image('scoreboard', 'Graphics/assets/scoreboard.png');
+            this.load.image('replaybutton', 'Graphics/assets/replaybutton.png');
         }
 
         create() {
             this.largestPoleNumber = 0;
-
+            
 
             this.game.physics.startSystem(Phaser.Physics.ARCADE);
             
@@ -153,8 +146,15 @@ module NinJump {
             this.backgroundGroup.add(background1);
             this.backgroundGroup.add(background2);
             this.backgroundGroup.add(background3);
-            //this.add.existing(background1);
-            //var bg = this.add.sprite(0, 0, 'backgroundScene');
+            
+            //score
+            this.score = 0;
+            this.scoreText = this.game.make.text(this.game.width - 100, 10, this.score.toString(), {
+                font: "bold 22px Comic Sans MS",
+                fill: "black"
+            });
+            this.game.add.existing(this.scoreText);
+            
             
 
             this.poleGroup = new Phaser.Group(this.game);
@@ -163,7 +163,7 @@ module NinJump {
             this.ninja.body['gravity']['y'] = this.ninja.gravity;
             this.addPole(this.startPosition);
             this.input.onDown.add(this.prepareToJump, this);
-            this.ninja.animations.play('idle', 7, true);
+            this.ninja.animations.play('jumpDown', 7, false);
 
         }
         update() {
@@ -174,6 +174,49 @@ module NinJump {
             this.game.physics.arcade.collide(this.ninja, this.poleGroup, (ninja: Ninja, pole: Pole) => {
                 this.checkLanding(ninja, pole, this);
             });
+
+            if (this.ninja.y > this.game.height && this.ninja.state != 'died') {
+                //ninja died
+                this.ninja.state = 'died';
+                this.die();
+            }
+        }
+
+        die(): void {
+            this.scoreBoard = this.add.bitmapData(this.game.width, this.game.height);
+            var boardImg = new Phaser.Image(this.game, this.game.width / 2, this.game.height / 3, 'scoreboard', 0);
+            this.scoreBoard.fill(10, 10, 10, 0.6);
+            this.scoreBoard.addToWorld();
+            boardImg.anchor.setTo(0.5);
+            boardImg.scale.setTo(screenSetting.scale);
+            
+            
+            
+            //score
+            topScore = Math.max(this.score, topScore);
+            var yourscoreText = this.game.make.text(boardImg.x, boardImg.y - boardImg.height/6, "Your score: " + this.score.toString(), {
+                font: "bold 30px Comic Sans MS",
+                fill: "white"
+            });
+            yourscoreText.anchor.set(0.5, 0.5);
+            var topScoreText = this.game.make.text(boardImg.x, boardImg.y + boardImg.height / 8, "Top score: " + topScore.toString(), {
+                font: "bold 30px Comic Sans MS",
+                fill: "white"
+            });
+            topScoreText.anchor.set(0.5, 0.5);
+
+            //replay button
+            var replayButton = new NinJumpButton(this.game, this.game.width / 2, this.game.height*5 / 8, 'replaybutton');
+            replayButton.scale.setTo(screenSetting.scale);
+            replayButton.onButtonClick(this, ()=> {
+                this.game.state.restart();
+            });
+
+            this.scoreBoard.draw(boardImg);
+            this.scoreBoard.draw(yourscoreText);
+            this.scoreBoard.draw(topScoreText);
+            
+            
         }
 
         addNewPoles(): void {
@@ -199,21 +242,21 @@ module NinJump {
 
         prepareToJump(): void {
             if (this.ninja.body['velocity']['y'] == 0) {
+                this.powerBar = this.add.sprite(this.ninja.x - this.ninja.width / 2, this.ninja.y - this.ninja.height / 2 - this.powerBarPosition, 'powerbar');
+                this.powerBar.width = 0;
 
+                this.powerTween = this.add.tween(this.powerBar);
+                this.powerTween.to({
+                    width: 100 * screenSetting.scale,
+                }, 1000, Phaser.Easing.Linear.None, true);
+                this.input.onDown.remove(this.prepareToJump, this);
+                this.input.onUp.add(this.jump, this);
             }
-            this.powerBar = this.add.sprite(this.ninja.x - this.ninja.width/2, this.ninja.y- this.ninja.height/2 - this.powerBarPosition, 'powerbar');
-            this.powerBar.width = 0;
-
-            this.powerTween = this.add.tween(this.powerBar);
-            this.powerTween.to({
-                width: 100 * screenSetting.scaleWidth,
-            }, 1000, Phaser.Easing.Linear.None, true);
-            this.input.onDown.remove(this.prepareToJump, this);
-            this.input.onUp.add(this.jump, this);
+            
         }
 
         jump(): void {
-            var ninjaJumpPower = -this.powerBar.width * 3 - 100;
+            var ninjaJumpPower = -this.powerBar.width * 5 - 100;
             this.powerBar.destroy();
             this.tweens.removeAll();
             this.ninja.body['velocity']['y'] = ninjaJumpPower * 2;
@@ -225,11 +268,19 @@ module NinJump {
             this.input.onUp.remove(this.jump, this);
         }
 
+        updateScore(diff: number): void {
+            if (diff != 0) {
+                this.score += Math.pow(2, diff);
+                //display
+                this.scoreText.text = this.score.toString();
+            }
+            
+        }
+
         checkLanding(ninja: Ninja, pole: Pole, game: Play): void {
             if (ninja.body.velocity.y == 0) {
                 //ninja landed on the pole
-                var border = ninja.x - pole.x;
-                if (ninja.state == 'jumping' && ninja.body.velocity.y == 0) {
+                if (ninja.state == 'jumping' ) {
                     ninja.state = 'idle';
                     //listen to jump action
                     game.input.onDown.add(game.prepareToJump, game);
@@ -238,12 +289,63 @@ module NinJump {
                     if (ninja.x != game.startPosition) {
                         ninja.x = game.startPosition;
                     }
+
+                    //update score
+                    var diff = pole.poleNumber - ninja.lastPole;
+                    ninja.lastPole = pole.poleNumber;
+                    game.updateScore(diff);
                 }
 
 
             } else {
                 ninja.state = 'falling';
             }
+        }
+    }
+
+    class NinJumpButton extends Phaser.Button {
+        constructor(game:Phaser.Game,x:number,y:number,key:string) {
+            super(game, x, y, key);
+            this.scale.setTo(screenSetting.scale);
+            this.anchor.setTo(0.5);
+            this.onInputDown.add((button:NinJumpButton) => {
+                var buttontween = game.add.tween(button.scale);
+                buttontween.to({ x: 0.8 * screenSetting.scale, y: 0.8 * screenSetting.scale }, 100, Phaser.Easing.Linear.None, true);
+            });
+            this.onInputUp.add((button: NinJumpButton) => {
+                var buttontween = game.add.tween(button.scale);
+                buttontween.to({ x: screenSetting.scale, y: screenSetting.scale }, 100, Phaser.Easing.Linear.None, true);
+                
+            },this,2);
+            
+            game.add.existing(this);
+        }
+
+        onButtonClick(caller: Phaser.State,callback:Function): void {
+            this.onInputUp.add(callback, caller, 1);
+        }
+    }
+
+    class Intro extends Phaser.State {
+        introImage: Phaser.Sprite;
+        preload() {
+            this.load.image('logo', 'Graphics/assets/logo.png');
+            this.load.image('playbutton', 'Graphics/assets/playButton.png');
+        }
+
+        create() {
+            this.introImage = this.add.sprite(screenSetting.width / 2, screenSetting.height / 3, 'logo');
+            this.introImage.anchor.setTo(0.5, 0.5);
+            this.introImage.scale.setTo(0.5 * screenSetting.scale);
+            this.stage.backgroundColor = "#87CEEB";
+            var introTween = this.add.tween(this.introImage.scale);
+            introTween.to({
+                x: screenSetting.scale, y: screenSetting.scale,
+            }, 2000, Phaser.Easing.Bounce.Out, true);
+            var button = new NinJumpButton(this.game, screenSetting.width / 2, screenSetting.height * 2 / 3, 'playbutton');
+            button.onButtonClick(this, () => {
+                this.game.state.start('play');
+            });
         }
     }
 
@@ -256,9 +358,11 @@ module NinJump {
             gameConfig.width = screenSetting.width;
             gameConfig.height = screenSetting.height;
             gameConfig.renderer = Phaser.AUTO;
+            gameConfig.parent = 'content';
             super(gameConfig);
+            this.state.add('intro', Intro);
             this.state.add('play', Play);
-            this.state.start('play');
+            this.state.start('intro');
         }
     }
 } 

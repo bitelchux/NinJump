@@ -20,9 +20,15 @@
   <ItemGroup>
     <Content Include="app.css" />
     <Content Include="app.js" />
-    <Content Include="Graphics\assets\powerbar.png" />
+    <Content Include="Graphics\assets\logo.png" />
+    <Content Include="Graphics\assets\playButton.png" />
+    <Content Include="Graphics\assets\powerbar2.png" />
+    <Content Include="Graphics\assets\replaybutton.png" />
+    <Content Include="Graphics\assets\scoreboard.png" />
     <Content Include="Graphics\ninja\ninja.png" />
+    <Content Include="Graphics\ninja\Slide.png" />
     <Content Include="Graphics\scene\BG\background.png" />
+    <Content Include="Graphics\scene\BG\waterfall.gif" />
     <Content Include="Graphics\scene\Object\Bush %281%29.png" />
     <Content Include="Graphics\scene\Object\Bush %282%29.png" />
     <Content Include="Graphics\scene\Object\Bush %283%29.png" />
@@ -74,6 +80,7 @@
     <Content Include="Graphics\scene\Object\Thumbs.db" />
     <Content Include="Graphics\scene\Tiles\Thumbs.db" />
     <Content Include="Graphics\ninja\ninja2.json" />
+    <None Include="ninjump.pubxml" />
     <None Include="web.Debug.config">
       <DependentUpon>web.config</DependentUpon>
     </None>

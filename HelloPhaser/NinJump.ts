@@ -26,7 +26,7 @@ module NinJump {
 
     
     class Ninja extends Phaser.Sprite {
-        lastPole: number;
+        lastPole: Pole;
         gravity: number;
         state: string;
         jumpPower: number;
@@ -40,7 +40,7 @@ module NinJump {
             this.state = 'jumping';
             this.jumpPower = 0;
             this.anchor.set(0.5);
-            this.lastPole = 0;
+            this.lastPole = null;
             this.scale.setTo(screenSetting.scale);
         }
 
@@ -49,6 +49,7 @@ module NinJump {
     class Pole extends Phaser.Sprite {
         poleNumber: number;
         _game: Play;
+        downVelocity: number;
         constructor(play: Play, x:number, y:number,key:string) {
             var game = play.game;
             super(game, x, y, key);
@@ -57,6 +58,7 @@ module NinJump {
             this.body['immovable'] = true;
             this.scale.setTo(screenSetting.scale);
             this.anchor.setTo(0.5, 0);
+            this.downVelocity = 50 * screenSetting.scaleHeight;
         }
 
         update() {
@@ -163,7 +165,7 @@ module NinJump {
             this.ninja = new Ninja(this.game, this.startPosition, 100);
             this.add.existing(this.ninja);
             this.ninja.body['gravity']['y'] = this.ninja.gravity;
-            this.addPole(this.startPosition);
+            this.ninja.lastPole = this.addPole(this.startPosition);
             this.input.onDown.add(this.prepareToJump, this);
             this.ninja.animations.play('jumpDown', 7, false);
 
@@ -245,7 +247,7 @@ module NinJump {
             this.addPole(nextPolePosition);
         }
 
-        addPole(x) {
+        addPole(x): Pole {
             if (x < this.game.width + this.maxPoleGap * 2) {
                 var poleType = this.game.rnd.between(0,1);
                 var newPole = new Pole(this, x, this.game.rnd.between(this.minPoleHeight, this.maxPoleHeight), poleType==0? 'squarePole':'trianglePole');
@@ -254,12 +256,13 @@ module NinJump {
                 this.poleGroup.add(newPole);
                 var nextPolePosition = x + this.game.rnd.between(this.minPoleGap, this.maxPoleGap);
                 this.addPole(nextPolePosition);
-
+                return newPole;
             }
+            return null;
         }
 
         prepareToJump(): void {
-            if (this.ninja.body['velocity']['y'] == 0) {
+            if (this.ninja.state=='idle') {
                 this.powerBar = this.add.sprite(this.ninja.x - this.ninja.width / 2, this.ninja.y - this.ninja.height / 2 - this.powerBarPosition, 'powerbar');
                 this.powerBar.width = 0;
 
@@ -284,6 +287,9 @@ module NinJump {
             this.ninja.animations.stop();
             this.ninja.animations.play('jumpUp', 5, false);
             this.input.onUp.remove(this.jump, this);
+            if (this.ninja.lastPole != null) {
+                this.ninja.lastPole.body.velocity.y = 0;
+            }
         }
 
         updateScore(diff: number): void {
@@ -298,7 +304,8 @@ module NinJump {
         checkLanding(ninja: Ninja, pole: Pole, game: Play): void {
             if (ninja.body.velocity.y == 0) {
                 //ninja landed on the pole
-                if (ninja.state == 'jumping' ) {
+                if (ninja.state == 'jumping') {
+                    //first touch
                     ninja.state = 'idle';
                     //listen to jump action
                     game.input.onDown.add(game.prepareToJump, game);
@@ -309,14 +316,17 @@ module NinJump {
                     }
 
                     //update score
-                    var diff = pole.poleNumber - ninja.lastPole;
-                    ninja.lastPole = pole.poleNumber;
+                    var diff = pole.poleNumber - ninja.lastPole.poleNumber;
+                    ninja.lastPole = pole;
                     game.updateScore(diff);
+                    pole.body.velocity.y = pole.downVelocity;
                 }
 
-
             } else {
-                ninja.state = 'falling';
+                if (ninja.state == 'jumping') {
+                    ninja.state = 'falling';
+                }
+                
             }
         }
     }

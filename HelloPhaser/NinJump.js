@@ -42,9 +42,9 @@ var NinJump;
     })(Phaser.Sprite);
     var Pole = (function (_super) {
         __extends(Pole, _super);
-        function Pole(play, x, y) {
+        function Pole(play, x, y, key) {
             var game = play.game;
-            _super.call(this, game, x, y, 'pole');
+            _super.call(this, game, x, y, key);
             game.physics.enable(this, Phaser.Physics.ARCADE);
             this._game = play;
             this.body['immovable'] = true;
@@ -110,11 +110,13 @@ var NinJump;
         }
         Play.prototype.preload = function () {
             this.load.atlasJSONArray('ninja', 'Graphics/ninja/ninja.png', 'Graphics/ninja/ninja2.json');
-            this.load.image('pole', 'Graphics/scene/Tiles/tile_Square.png');
+            this.load.image('squarePole', 'Graphics/scene/Tiles/tile_Square.png');
+            this.load.image('trianglePole', 'Graphics/scene/Tiles/tile_Triangle.png');
             this.load.image('powerbar', 'Graphics/assets/powerbar2.png');
             this.load.image('backgroundScene', 'Graphics/scene/BG/background.png');
             this.load.image('scoreboard', 'Graphics/assets/scoreboard.png');
             this.load.image('replaybutton', 'Graphics/assets/replaybutton.png');
+            this.load.image('facebookbutton', 'Graphics/assets/facebook_icon.png');
         };
         Play.prototype.create = function () {
             this.largestPoleNumber = 0;
@@ -176,10 +178,22 @@ var NinJump;
             });
             topScoreText.anchor.set(0.5, 0.5);
             //replay button
-            var replayButton = new NinJumpButton(this.game, this.game.width / 2, this.game.height * 5 / 8, 'replaybutton');
+            var replayButton = new NinJumpButton(this.game, this.game.width * 2 / 3, this.game.height * 5 / 8, 'replaybutton');
             replayButton.scale.setTo(screenSetting.scale);
             replayButton.onButtonClick(this, function () {
                 _this.game.state.restart();
+            });
+            var facebookButton = new NinJumpButton(this.game, this.game.width / 3, this.game.height * 5 / 8, 'facebookbutton');
+            facebookButton.scale.setTo(screenSetting.scale);
+            facebookButton.onButtonClick(this, function () {
+                //this.game.state.restart();
+                if (FB) {
+                    FB.ui({
+                        method: 'feed',
+                        link: 'http://ninjump.azurewebsites.net/',
+                        caption: 'I got ' + _this.score + ' On NinJump',
+                    }, function (response) { });
+                }
             });
             this.scoreBoard.draw(boardImg);
             this.scoreBoard.draw(yourscoreText);
@@ -195,7 +209,8 @@ var NinJump;
         };
         Play.prototype.addPole = function (x) {
             if (x < this.game.width + this.maxPoleGap * 2) {
-                var newPole = new Pole(this, x, this.game.rnd.between(this.minPoleHeight, this.maxPoleHeight));
+                var poleType = this.game.rnd.between(0, 1);
+                var newPole = new Pole(this, x, this.game.rnd.between(this.minPoleHeight, this.maxPoleHeight), poleType == 0 ? 'squarePole' : 'trianglePole');
                 newPole.poleNumber = this.largestPoleNumber;
                 this.largestPoleNumber++;
                 this.poleGroup.add(newPole);
@@ -298,7 +313,17 @@ var NinJump;
             introTween.to({
                 x: screenSetting.scale, y: screenSetting.scale,
             }, 2000, Phaser.Easing.Bounce.Out, true);
-            var button = new NinJumpButton(this.game, screenSetting.width / 2, screenSetting.height * 2 / 3, 'playbutton');
+            var instructionText = this.game.make.text(this.game.width / 2, this.introImage.y + this.introImage.height, 'Hold the screen to gain jump power', {
+                font: "bold 30px Comic Sans MS",
+                fill: "white",
+                wordWrap: true,
+                wordWrapWidth: this.game.width * 3 / 4,
+                align: 'center',
+            });
+            instructionText.anchor.set(0.5, 0);
+            this.game.add.existing(instructionText);
+            var button = new NinJumpButton(this.game, screenSetting.width / 2, instructionText.y + instructionText.height * 1.5, 'playbutton');
+            button.anchor.setTo(0.5, 0);
             button.onButtonClick(this, function () {
                 _this.game.state.start('play');
             });

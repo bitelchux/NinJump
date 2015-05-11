@@ -20,6 +20,8 @@
   <ItemGroup>
     <Content Include="app.css" />
     <Content Include="app.js" />
+    <Content Include="fbsdk.js" />
+    <Content Include="Graphics\assets\facebook_icon.png" />
     <Content Include="Graphics\assets\logo.png" />
     <Content Include="Graphics\assets\playButton.png" />
     <Content Include="Graphics\assets\powerbar2.png" />
@@ -61,6 +63,7 @@
     <Content Include="Graphics\scene\Tiles\8.png" />
     <Content Include="Graphics\scene\Tiles\9.png" />
     <Content Include="Graphics\scene\Tiles\tile_Square.png" />
+    <Content Include="Graphics\scene\Tiles\tile_Triangle.png" />
     <Content Include="index.html" />
     <Content Include="NinJump.js" />
     <Content Include="phaser.js" />
@@ -70,6 +73,7 @@
   </ItemGroup>
   <ItemGroup>
     <TypeScriptCompile Include="app.ts" />
+    <TypeScriptCompile Include="fdsdk.d.ts" />
     <TypeScriptCompile Include="NinJump.ts" />
     <TypeScriptCompile Include="p2.d.ts" />
     <TypeScriptCompile Include="phaser.comments.d.ts" />
